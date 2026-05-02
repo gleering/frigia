@@ -4,11 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { formatPrice, CONCENTRATION_LABELS } from "@/lib/utils";
-import { AddToCartButton } from "@/components/store/AddToCartButton";
+import { ProductTabs } from "@/components/store/ProductTabs";
+import { ProductCard } from "@/components/store/ProductCard";
 import { PixelProductEvents } from "@/components/analytics/PixelProductEvents";
+import { mapProduct } from "@/lib/utils";
 import type { ProductWithBrand } from "@/types";
 
 export const revalidate = 3600;
+
+/* Misma paleta suave que ProductCard */
+const ACCENTS = [
+  "#f3ede4", "#e8e4f0", "#e4ede8", "#f0e8e4",
+  "#e4e8f0", "#f0ede4", "#e8f0ec", "#f0e4ec",
+];
+function accentForId(id: string): string {
+  return ACCENTS[id.charCodeAt(id.length - 1) % ACCENTS.length];
+}
 
 export async function generateStaticParams() {
   const products = await prisma.product.findMany({
@@ -36,6 +47,9 @@ export async function generateMetadata({
     description:
       product.description ??
       `${product.name} ${CONCENTRATION_LABELS[product.concentration]} ${product.ml}ml de ${product.brand.name}`,
+    openGraph: {
+      images: product.images[0] ? [{ url: product.images[0] }] : [],
+    },
   };
 }
 
@@ -54,28 +68,17 @@ export default async function ProductPage({
   if (!product) notFound();
 
   const related = await prisma.product.findMany({
-    where: {
-      active: true,
-      brandId: product.brandId,
-      id: { not: product.id },
-    },
+    where: { active: true, brandId: product.brandId, id: { not: product.id } },
     include: { brand: true, category: true },
     take: 4,
     orderBy: { createdAt: "desc" },
   });
 
-  const notes = product.notes as {
-    top: string[];
-    heart: string[];
-    base: string[];
-  };
-
+  const notes = product.notes as { top: string[]; heart: string[]; base: string[] };
+  const accent = accentForId(product.id);
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5492364000000";
-  const waMsg = encodeURIComponent(
-    `Hola Frigia! Me interesa el ${product.name} (${product.ml}ml). ¿Tienen stock?`
-  );
 
-  const productForCart: ProductWithBrand = {
+  const productForClient: ProductWithBrand = {
     id: product.id,
     name: product.name,
     slug: product.slug,
@@ -86,7 +89,7 @@ export default async function ProductPage({
     ml: product.ml,
     concentration: product.concentration,
     fragranceFamily: product.fragranceFamily,
-    notes: notes,
+    notes,
     images: product.images,
     active: product.active,
     featured: product.featured,
@@ -115,7 +118,7 @@ export default async function ProductPage({
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="bg-frigia-paper">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -129,207 +132,150 @@ export default async function ProductPage({
           category: product.category?.name,
         }}
       />
-      {/* Breadcrumb */}
-      <nav className="text-xs text-neutral-400 mb-6 flex items-center gap-2">
-        <Link href="/" className="hover:text-frigia-deep transition-colors">
-          Inicio
-        </Link>
-        <span>/</span>
-        <Link
-          href="/catalogo"
-          className="hover:text-frigia-deep transition-colors"
-        >
-          Catálogo
-        </Link>
-        <span>/</span>
-        <span className="text-frigia-dark">{product.name}</span>
-      </nav>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16">
-        {/* Gallery */}
-        <div>
-          {product.images.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              <div className="relative aspect-square rounded-2xl overflow-hidden bg-frigia-light">
-                <Image
-                  src={product.images[0]}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-              {product.images.length > 1 && (
-                <div className="flex gap-2">
-                  {product.images.slice(1).map((img, idx) => (
-                    <div
-                      key={idx}
-                      className="relative w-16 h-16 rounded-lg overflow-hidden bg-frigia-light border border-neutral-200"
-                    >
-                      <Image
-                        src={img}
-                        alt={`${product.name} ${idx + 2}`}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="aspect-square rounded-2xl bg-frigia-light flex items-center justify-center">
-              <span className="text-8xl opacity-30">🌸</span>
-            </div>
-          )}
-        </div>
+      {/* ── Hero image — tinted background ── */}
+      <div
+        className="relative w-full"
+        style={{ background: accent, minHeight: 360 }}
+      >
+        {product.images[0] ? (
+          <div className="relative max-w-lg mx-auto" style={{ aspectRatio: "3/4", maxHeight: 480 }}>
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="object-contain"
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center" style={{ minHeight: 360 }}>
+            <svg
+              width="80"
+              height="80"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#c9a96a"
+              strokeWidth="0.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="opacity-30"
+            >
+              <path d="M12 3s-6 7-6 12a6 6 0 0 0 12 0c0-5-6-12-6-12Z" />
+            </svg>
+          </div>
+        )}
 
-        {/* Info */}
-        <div className="flex flex-col">
-          <p className="text-frigia-gold text-sm font-semibold uppercase tracking-wider mb-2">
-            {product.brand.name}
-          </p>
-          <h1 className="font-display text-3xl font-bold text-frigia-dark mb-1">
-            {product.name}
-          </h1>
-          <p className="text-neutral-500 text-sm mb-4">
-            {product.ml}ml ·{" "}
-            {CONCENTRATION_LABELS[product.concentration] ??
-              product.concentration}
-            {product.category && ` · ${product.category.name}`}
-          </p>
-
-          <p className="text-3xl font-bold text-frigia-dark mb-6">
-            {formatPrice(Number(product.price))}
-          </p>
-
-          {product.stock > 0 ? (
-            <div className="flex flex-col gap-3 mb-6">
-              <AddToCartButton product={productForCart} showLabel />
-              <a
-                href={`https://wa.me/${whatsapp}?text=${waMsg}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-green-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-600 transition-colors text-sm"
+        {/* Thumbnail strip for multiple images */}
+        {product.images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {product.images.map((img, i) => (
+              <div
+                key={i}
+                className="w-10 h-10 rounded-lg overflow-hidden border-2 border-white/60"
+                style={{ background: accent }}
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.488" />
-                </svg>
-                Comprar por WhatsApp
-              </a>
-              <p className="text-xs text-neutral-400 text-center">
-                Stock disponible: {product.stock} unidades
+                <Image src={img} alt="" width={40} height={40} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Content sheet ── */}
+      <div
+        className="relative bg-frigia-paper rounded-t-3xl -mt-5 z-10 max-w-6xl mx-auto px-4 pt-6 pb-16"
+      >
+        {/* Breadcrumb */}
+        <nav className="text-[10px] text-frigia-mute flex items-center gap-2 mb-5">
+          <Link href="/" className="hover:text-frigia-deep transition-colors">Inicio</Link>
+          <span>/</span>
+          <Link href="/catalogo" className="hover:text-frigia-deep transition-colors">Catálogo</Link>
+          <span>/</span>
+          <span className="text-frigia-deep truncate max-w-[200px]">{product.name}</span>
+        </nav>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Left col: brand + name + meta */}
+          <div>
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-frigia-mute">
+              {product.brand.name}
+            </p>
+            <h1 className="font-display italic font-medium text-[clamp(28px,5vw,40px)] leading-tight text-frigia-deep mt-1">
+              {product.name}
+            </h1>
+            <p className="text-xs text-frigia-mute mt-2">
+              {product.fragranceFamily} · {product.ml} ml ·{" "}
+              {CONCENTRATION_LABELS[product.concentration] ?? product.concentration}
+            </p>
+
+            {/* Price — visible on mobile above tabs, hidden md (shown in right col) */}
+            <div className="md:hidden mt-5">
+              <span className="text-3xl font-bold text-frigia-deep">
+                {formatPrice(Number(product.price))}
+              </span>
+              <p className="text-[11px] text-frigia-mute mt-0.5">
+                o 3 cuotas sin interés de {formatPrice(Number(product.price) / 3)}
               </p>
             </div>
-          ) : (
-            <div className="mb-6">
-              <div className="bg-neutral-100 text-neutral-500 text-center py-3 rounded-xl text-sm font-medium mb-3">
-                Sin stock disponible
-              </div>
-              <a
-                href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(
-                  `Hola! Me interesa ${product.name} que figura sin stock. ¿Cuándo lo tendrían?`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 border border-green-500 text-green-600 font-medium py-3 px-6 rounded-xl hover:bg-green-50 transition-colors text-sm"
-              >
-                Consultar disponibilidad
-              </a>
-            </div>
-          )}
 
-          {/* Fragrance family */}
-          <div className="bg-frigia-light rounded-xl p-4 mb-4">
-            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1">
-              Familia olfativa
-            </p>
-            <p className="text-frigia-dark font-medium">{product.fragranceFamily}</p>
+            {/* Fragrance family pill — desktop accent */}
+            <div className="hidden md:flex flex-wrap gap-2 mt-5">
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium text-frigia-graphite"
+                style={{ background: accent }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ background: "var(--frigia-grad)" }}
+                />
+                {product.fragranceFamily}
+              </span>
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium text-frigia-graphite"
+                style={{ background: accent }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ background: "var(--frigia-grad)" }}
+                />
+                {product.ml} ml
+              </span>
+            </div>
+
+            {/* Description — desktop only in left col */}
+            {product.description && (
+              <p className="hidden md:block text-sm leading-relaxed text-frigia-graphite mt-6">
+                {product.description}
+              </p>
+            )}
           </div>
 
-          {/* Notes */}
-          {(notes.top.length > 0 ||
-            notes.heart.length > 0 ||
-            notes.base.length > 0) && (
-            <div className="bg-white border border-neutral-100 rounded-xl p-4">
-              <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
-                Pirámide olfativa
-              </p>
-              <div className="flex flex-col gap-2 text-sm">
-                {notes.top.length > 0 && (
-                  <div>
-                    <span className="text-xs font-medium text-frigia-gold">
-                      Salida:{" "}
-                    </span>
-                    <span className="text-neutral-600">
-                      {notes.top.join(", ")}
-                    </span>
-                  </div>
-                )}
-                {notes.heart.length > 0 && (
-                  <div>
-                    <span className="text-xs font-medium text-frigia-rose">
-                      Corazón:{" "}
-                    </span>
-                    <span className="text-neutral-600">
-                      {notes.heart.join(", ")}
-                    </span>
-                  </div>
-                )}
-                {notes.base.length > 0 && (
-                  <div>
-                    <span className="text-xs font-medium text-frigia-dark font-semibold">
-                      Fondo:{" "}
-                    </span>
-                    <span className="text-neutral-600">
-                      {notes.base.join(", ")}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Right col: tabs + CTA */}
+          <div>
+            <ProductTabs product={productForClient} whatsapp={whatsapp} />
+          </div>
         </div>
       </div>
 
-      {/* Description */}
-      {product.description && (
-        <div className="max-w-2xl mb-16">
-          <h2 className="font-display text-xl font-bold text-frigia-dark mb-3">
-            Descripción
-          </h2>
-          <p className="text-neutral-600 leading-relaxed">{product.description}</p>
-        </div>
-      )}
-
-      {/* Related */}
+      {/* ── Productos relacionados ── */}
       {related.length > 0 && (
-        <div>
-          <h2 className="font-display text-2xl font-bold text-frigia-dark mb-6">
-            Más de {product.brand.name}
-          </h2>
+        <div className="max-w-6xl mx-auto px-4 pb-16">
+          <div className="border-t border-frigia-light pt-10 mb-6 flex items-baseline justify-between">
+            <h2 className="font-display italic font-medium text-2xl text-frigia-deep">
+              Más de {product.brand.name}
+            </h2>
+            <Link
+              href={`/catalogo?marca=${product.brand.slug}`}
+              className="text-[10px] font-semibold tracking-widest uppercase text-frigia-mute hover:text-frigia-deep transition-colors"
+            >
+              Ver todo →
+            </Link>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {related.map((p) => (
-              <Link
-                key={p.id}
-                href={`/catalogo/${p.slug}`}
-                className="group bg-white rounded-2xl border border-neutral-100 hover:shadow-lg transition-shadow p-4"
-              >
-                <p className="text-xs text-frigia-gold font-medium mb-1">
-                  {p.brand.name}
-                </p>
-                <p className="text-sm font-semibold text-frigia-dark group-hover:text-frigia-deep transition-colors line-clamp-2">
-                  {p.name}
-                </p>
-                <p className="text-xs text-neutral-400 mt-0.5">
-                  {p.ml}ml
-                </p>
-                <p className="text-sm font-bold text-frigia-dark mt-2">
-                  {formatPrice(Number(p.price))}
-                </p>
-              </Link>
+              <ProductCard key={p.id} product={mapProduct(p)} />
             ))}
           </div>
         </div>
