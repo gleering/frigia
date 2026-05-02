@@ -1,20 +1,54 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #FAF6F2;
-  --color-foreground: #2C1810;
-  --color-frigia-rose: #C4767A;
-  --color-frigia-deep: #8B3A3E;
-  --color-frigia-cream: #FAF6F2;
-  --color-frigia-gold: #B8966E;
-  --color-frigia-dark: #2C1810;
-  --color-frigia-light: #F2E8E4;
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-playfair);
+  /* Core palette */
+  --color-background: #fcfaf6;
+  --color-foreground: #1a1a1a;
+
+  --color-frigia-dark:      #0a0a0a;
+  --color-frigia-deep:      #1a1a1a;
+  --color-frigia-graphite:  #2a2a2a;
+  --color-frigia-bone:      #f5f1ea;
+  --color-frigia-cream:     #faf7f1;
+  --color-frigia-paper:     #fcfaf6;
+  --color-frigia-light:     #e8e0d2;
+  --color-frigia-mute:      #8a8378;
+
+  /* Accent — gradiente rosa→naranja→amarillo */
+  --color-frigia-rose:      #e63b7a;
+  --color-frigia-coral:     #f06b3e;
+  --color-frigia-amber:     #f5a623;
+  --color-frigia-gold:      #c9a96a;
+  --color-frigia-gold-deep: #a98748;
+
+  /* Typography */
+  --font-sans:    var(--font-manrope);
+  --font-display: var(--font-cormorant);
+  --font-script:  var(--font-pinyon);
+}
+
+:root {
+  --frigia-grad:      linear-gradient(135deg, #e63b7a 0%, #f06b3e 45%, #f5a623 75%, #f7d046 100%);
+  --frigia-grad-soft: linear-gradient(135deg, #fde8ef 0%, #fde4d8 50%, #fdf3d0 100%);
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-inter), Arial, sans-serif;
+  font-family: var(--font-manrope), -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Gradient utilities */
+.frigia-grad-bg   { background: var(--frigia-grad); }
+.frigia-grad-soft { background: var(--frigia-grad-soft); }
+.frigia-grad-text {
+  background: var(--frigia-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Scrollbar hide */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }

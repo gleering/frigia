@@ -12,21 +12,21 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-frigia-deep text-white hover:bg-frigia-deep/90 active:scale-95",
+    "bg-frigia-dark text-frigia-bone hover:bg-frigia-graphite active:scale-95",
   secondary:
     "bg-frigia-rose text-white hover:bg-frigia-rose/90 active:scale-95",
   ghost:
-    "text-frigia-dark hover:bg-frigia-light active:scale-95",
+    "text-frigia-deep hover:bg-frigia-light active:scale-95",
   danger:
     "bg-red-600 text-white hover:bg-red-700 active:scale-95",
   outline:
-    "border border-frigia-deep text-frigia-deep hover:bg-frigia-cream active:scale-95",
+    "border border-frigia-dark text-frigia-dark hover:bg-frigia-light active:scale-95",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "text-xs px-3 py-1.5 rounded",
-  md: "text-sm px-4 py-2 rounded-md",
-  lg: "text-base px-6 py-3 rounded-lg",
+  sm: "text-xs px-3 py-1.5 rounded-full",
+  md: "text-sm px-5 py-2.5 rounded-full",
+  lg: "text-sm px-7 py-3.5 rounded-full tracking-wide uppercase font-semibold",
 };
 
 export function Button({
@@ -41,7 +41,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed",
         variants[variant],
         sizes[size],
         className

@@ -2,22 +2,48 @@
 import Link from "next/link";
 import { useCart } from "@/store/cart";
 
+function FrigiaLogo() {
+  return (
+    <Link href="/" className="flex items-center gap-3" aria-label="Frigia Perfumería">
+      {/* Gradient ring + dark inner circle with italic F */}
+      <span
+        className="flex-shrink-0 flex items-center justify-center rounded-full"
+        style={{
+          width: 38,
+          height: 38,
+          background: "var(--frigia-grad)",
+          padding: 2.5,
+        }}
+      >
+        <span
+          className="flex items-center justify-center rounded-full w-full h-full font-display italic font-medium text-frigia-bone"
+          style={{
+            background: "#0a0a0a",
+            fontSize: 18,
+            lineHeight: 1,
+            paddingBottom: 1,
+          }}
+        >
+          F
+        </span>
+      </span>
+      {/* Wordmark */}
+      <span className="font-sans font-bold text-frigia-dark tracking-[0.28em] text-sm uppercase hidden sm:block">
+        FRIGIA
+      </span>
+    </Link>
+  );
+}
+
 export function Header() {
   const itemCount = useCart((s) => s.itemCount());
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-neutral-100 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="font-display text-2xl font-bold text-frigia-dark tracking-tight">
-            Frigia
-          </span>
-          <span className="text-xs text-frigia-gold font-medium hidden sm:block">
-            Perfumería
-          </span>
-        </Link>
+    <header className="sticky top-0 z-40 bg-frigia-paper/95 backdrop-blur-md border-b border-frigia-light">
+      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+        <FrigiaLogo />
 
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-600">
+        <nav className="hidden md:flex items-center gap-7 text-xs font-semibold tracking-widest uppercase text-frigia-mute">
           <Link href="/catalogo" className="hover:text-frigia-deep transition-colors">
             Catálogo
           </Link>
@@ -29,27 +55,34 @@ export function Header() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          {/* Search */}
           <Link
             href="/catalogo"
-            className="text-neutral-500 hover:text-frigia-deep transition-colors"
+            className="text-frigia-mute hover:text-frigia-deep transition-colors"
             aria-label="Buscar"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="m20 20-3.5-3.5"/>
             </svg>
           </Link>
 
+          {/* Bag */}
           <Link
             href="/carrito"
-            className="relative text-neutral-500 hover:text-frigia-deep transition-colors"
+            className="relative text-frigia-mute hover:text-frigia-deep transition-colors"
             aria-label="Carrito"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z" />
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 7h14l-1 13H6L5 7Z"/>
+              <path d="M9 7a3 3 0 0 1 6 0"/>
             </svg>
             {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-frigia-rose text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center leading-none">
+              <span
+                className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center text-white text-[9px] font-bold rounded-full px-0.5"
+                style={{ background: "var(--frigia-grad)" }}
+              >
                 {itemCount > 9 ? "9+" : itemCount}
               </span>
             )}
