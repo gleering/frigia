@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/store/ProductCard";
 import { mapProduct } from "@/lib/utils";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const CATEGORIES = [
   { id: "para-ella",  label: "Para Ella",     bg: "#2a1220", href: "/catalogo?categoria=para-ella",  icon: "❀" },
@@ -21,13 +21,13 @@ export default async function HomePage() {
       include: { brand: true, category: true },
       orderBy: { createdAt: "desc" },
       take: 4,
-    }),
+    }).catch(() => []),
     prisma.product.findMany({
       where: { active: true },
       include: { brand: true, category: true },
       orderBy: { createdAt: "desc" },
       take: 8,
-    }),
+    }).catch(() => []),
   ]);
 
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5492364000000";

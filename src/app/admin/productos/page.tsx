@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 import { Badge } from "@/components/ui/Badge";
 import { formatPrice, CONCENTRATION_LABELS } from "@/lib/utils";
 import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
@@ -29,7 +31,7 @@ export default async function ProductsPage({
     include: { brand: true, category: true },
     orderBy: { createdAt: "desc" },
     take: 100,
-  });
+  }).catch(() => []);
 
   return (
     <div>

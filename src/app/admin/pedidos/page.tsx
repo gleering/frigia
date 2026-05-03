@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
+
+export const dynamic = "force-dynamic";
 import { formatPrice } from "@/lib/utils";
 import type { OrderStatus } from "@/generated/prisma/client";
 
@@ -41,12 +43,12 @@ export default async function PedidosPage({
     },
     orderBy: { createdAt: "desc" },
     take: 100,
-  });
+  }).catch(() => []);
 
   const counts = await prisma.order.groupBy({
     by: ["status"],
     _count: true,
-  });
+  }).catch(() => []);
 
   const countMap = Object.fromEntries(counts.map((c) => [c.status, c._count]));
 

@@ -1,14 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard() {
   const [totalProducts, activeProducts, totalOrders, pendingOrders, brands] =
     await Promise.all([
-      prisma.product.count(),
-      prisma.product.count({ where: { active: true } }),
-      prisma.order.count(),
-      prisma.order.count({ where: { status: "PENDING" } }),
-      prisma.brand.count(),
+      prisma.product.count().catch(() => 0),
+      prisma.product.count({ where: { active: true } }).catch(() => 0),
+      prisma.order.count().catch(() => 0),
+      prisma.order.count({ where: { status: "PENDING" } }).catch(() => 0),
+      prisma.brand.count().catch(() => 0),
     ]);
 
   const stats = [

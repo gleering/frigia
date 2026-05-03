@@ -10,7 +10,7 @@ import { PixelProductEvents } from "@/components/analytics/PixelProductEvents";
 import { mapProduct } from "@/lib/utils";
 import type { ProductWithBrand } from "@/types";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 /* Misma paleta suave que ProductCard */
 const ACCENTS = [
@@ -22,12 +22,16 @@ function accentForId(id: string): string {
 }
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    where: { active: true },
-    select: { slug: true },
-    take: 50,
-  });
-  return products.map((p) => ({ slug: p.slug }));
+  try {
+    const products = await prisma.product.findMany({
+      where: { active: true },
+      select: { slug: true },
+      take: 100,
+    });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({

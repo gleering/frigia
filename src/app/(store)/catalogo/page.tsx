@@ -5,7 +5,7 @@ import type { Prisma, Concentration } from "@/generated/prisma/client";
 import { Suspense } from "react";
 import { mapProduct } from "@/lib/utils";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Catálogo de Perfumes",
@@ -62,10 +62,10 @@ export default async function CatalogPage({ searchParams }: PageProps) {
       include: { brand: true, category: true },
       orderBy,
       take: 48,
-    }),
-    prisma.brand.findMany({ orderBy: { name: "asc" } }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-    prisma.product.count({ where }),
+    }).catch(() => []),
+    prisma.brand.findMany({ orderBy: { name: "asc" } }).catch(() => []),
+    prisma.category.findMany({ orderBy: { name: "asc" } }).catch(() => []),
+    prisma.product.count({ where }).catch(() => 0),
   ]);
 
   const activeFilters = [q, marca, concentracion, categoria].filter(Boolean).length;

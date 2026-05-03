@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { formatPrice } from "@/lib/utils";
@@ -47,7 +49,7 @@ export default async function OrderDetailPage({
         },
       },
     },
-  });
+  }).catch(() => null);
 
   if (!order) notFound();
 
