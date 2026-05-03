@@ -6,12 +6,12 @@ import { mapProduct } from "@/lib/utils";
 export const revalidate = 3600;
 
 const CATEGORIES = [
-  { id: "perfumes",  label: "Perfumes",     bg: "#0a0a0a", href: "/catalogo" },
-  { id: "edp",       label: "Eau de Parfum", bg: "#1a1a2e", href: "/catalogo?concentracion=EDP" },
-  { id: "edt",       label: "Eau de Toilette", bg: "#2a1a0a", href: "/catalogo?concentracion=EDT" },
-  { id: "floral",    label: "Florales",      bg: "#2a1220", href: "/catalogo?familia=floral" },
-  { id: "oriental",  label: "Orientales",    bg: "#1a2010", href: "/catalogo?familia=oriental" },
-  { id: "regalos",   label: "Regalos",       bg: "#a98748", href: "/catalogo?destacado=1" },
+  { id: "para-ella",  label: "Para Ella",     bg: "#2a1220", href: "/catalogo?categoria=para-ella",  icon: "❀" },
+  { id: "para-el",    label: "Para Él",       bg: "#1a1a2e", href: "/catalogo?categoria=para-el",    icon: "◈" },
+  { id: "unisex",     label: "Unisex",        bg: "#0a0a0a", href: "/catalogo?categoria=unisex",     icon: "◎" },
+  { id: "body-splash",label: "Body Splash",   bg: "#2a1a0a", href: "/catalogo?categoria=body-splash",icon: "✦" },
+  { id: "edp",        label: "Eau de Parfum", bg: "#1a2010", href: "/catalogo?concentracion=EDP",    icon: "◆" },
+  { id: "regalos",    label: "Regalos",       bg: "#a98748", href: "/catalogo?destacado=1",          icon: "◇" },
 ];
 
 export default async function HomePage() {
@@ -137,7 +137,7 @@ export default async function HomePage() {
             <Link
               key={cat.id}
               href={cat.href}
-              className="flex-shrink-0 flex flex-col justify-between rounded-2xl p-4 text-left transition-opacity hover:opacity-90"
+              className="flex-shrink-0 flex flex-col justify-between rounded-2xl p-4 text-left transition-opacity hover:opacity-90 active:scale-95 transition-transform"
               style={{
                 width: 110,
                 aspectRatio: "3/4",
@@ -146,8 +146,8 @@ export default async function HomePage() {
               }}
             >
               <span
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(245,241,234,0.12)" }}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-frigia-bone/60 text-base"
+                style={{ background: "rgba(245,241,234,0.10)" }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 3s-6 7-6 12a6 6 0 0 0 12 0c0-5-6-12-6-12Z"/>

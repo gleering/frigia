@@ -20,11 +20,12 @@ interface PageProps {
     concentracion?: string;
     categoria?: string;
     orden?: string;
+    destacado?: string;
   }>;
 }
 
 export default async function CatalogPage({ searchParams }: PageProps) {
-  const { q, marca, concentracion, categoria, orden } = await searchParams;
+  const { q, marca, concentracion, categoria, orden, destacado } = await searchParams;
 
   const where: Prisma.ProductWhereInput = {
     active: true,
@@ -41,6 +42,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
       marca ? { brand: { slug: marca } } : {},
       concentracion ? { concentration: concentracion as Concentration } : {},
       categoria ? { category: { slug: categoria } } : {},
+      destacado === "1" ? { featured: true } : {},
     ],
   };
 

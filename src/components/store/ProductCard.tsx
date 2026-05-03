@@ -9,15 +9,41 @@ interface ProductCardProps {
   product: ProductWithBrand;
 }
 
-/* Soft tinted backgrounds cycle per product — gives each card its own personality */
 const ACCENTS = [
   "#f3ede4", "#e8e4f0", "#e4ede8", "#f0e8e4",
   "#e4e8f0", "#f0ede4", "#e8f0ec", "#f0e4ec",
 ];
 
 function accentForId(id: string): string {
-  const n = id.charCodeAt(id.length - 1) % ACCENTS.length;
-  return ACCENTS[n];
+  return ACCENTS[id.charCodeAt(id.length - 1) % ACCENTS.length];
+}
+
+function ProductPlaceholder({ brand, accent }: { brand: string; accent: string }) {
+  const initial = brand.charAt(0).toUpperCase();
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: accent }}>
+      <span
+        className="font-display italic font-medium select-none"
+        style={{ fontSize: "5rem", color: "#c9a96a", opacity: 0.22, lineHeight: 1 }}
+      >
+        {initial}
+      </span>
+      <svg
+        width="30"
+        height="30"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#c9a96a"
+        strokeWidth="0.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ opacity: 0.35, marginTop: -6 }}
+      >
+        <path d="M12 3s-6 7-6 12a6 6 0 0 0 12 0c0-5-6-12-6-12Z"/>
+        <path d="M10 8c0 0-1 2-1 4" strokeWidth="0.6"/>
+      </svg>
+    </div>
+  );
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -30,7 +56,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className="group" style={{ width: "100%" }}>
-      {/* Image area */}
       <Link href={`/catalogo/${product.slug}`} className="block">
         <div
           className="relative rounded-2xl overflow-hidden"
@@ -45,24 +70,9 @@ export function ProductCard({ product }: ProductCardProps) {
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#c9a96a"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="opacity-40"
-              >
-                <path d="M12 3s-6 7-6 12a6 6 0 0 0 12 0c0-5-6-12-6-12Z"/>
-              </svg>
-            </div>
+            <ProductPlaceholder brand={product.brand.name} accent={accent} />
           )}
 
-          {/* Sin stock overlay */}
           {product.stock === 0 && (
             <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-frigia-mute bg-white/90 px-3 py-1 rounded-full">
@@ -71,14 +81,13 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          {/* Badge destacado */}
           {product.featured && product.stock > 0 && (
             <div className="absolute top-2.5 left-2.5">
               <Badge variant="dark">Destacado</Badge>
             </div>
           )}
 
-          {/* Heart */}
+          {/* Heart — solo en hover en desktop */}
           <button
             className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100"
             style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(8px)" }}
@@ -90,9 +99,9 @@ export function ProductCard({ product }: ProductCardProps) {
             </svg>
           </button>
 
-          {/* Add / Consultar button — bottom right */}
+          {/* Add / Consultar — siempre visible en mobile, hover en desktop */}
           {product.stock > 0 ? (
-            <div className="absolute bottom-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute bottom-2.5 right-2.5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
               <AddToCartButton product={product} />
             </div>
           ) : (
@@ -100,7 +109,7 @@ export function ProductCard({ product }: ProductCardProps) {
               href={`https://wa.me/${whatsapp}?text=${waMsg}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute bottom-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute bottom-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
               style={{ background: "#25d366" }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
@@ -111,7 +120,6 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* Info */}
       <div className="pt-3 px-0.5">
         <p className="text-[9px] font-semibold tracking-[0.18em] uppercase text-frigia-mute">
           {product.brand.name}
